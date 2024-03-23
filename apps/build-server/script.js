@@ -3,11 +3,14 @@ const path = require("path");
 const fs = require("fs");
 const mimetypes = require("mime-types");
 const {S3Client,PutObjectCommand} = require("@aws-sdk/client-s3")
+const dotenv = require("dotenv");
+dotenv.config();
+
 const s3client = new S3Client({
-    region:"",
+    region:process.env.AWS_REGION,
     credentials:{
-        accessKeyId:"",
-        secretAccessKey:""
+        accessKeyId:process.env.AWS_ACCESS_KEY,
+        secretAccessKey:process.env.AWS_SECRET_ACCESS_KEY
     }
 })
 const PROJECT_ID = process.env.PROJECT_ID;
@@ -24,7 +27,6 @@ async function init()
         console.log("Error:"+data.toString())
     })
     p.stdout.on("close",async ()=>{
-        console.log("Build Completed");
         const folderPath = path.join(__dirname,"output","dist");
         const distFolderContent = fs.readdirSync(folderPath,{recursive:true});
         for( file of distFolderContent ){
@@ -33,7 +35,7 @@ async function init()
                 continue
             console.log("Uploading "+filePath);
             const command = new PutObjectCommand({
-                Bucket:"launchpilot",
+                Bucket:process.env.AWS_BUCKET_NAME,
                 Key:`outputs/${PROJECT_ID}/${file}`,
                 Body:fs.createReadStream(filePath),
                 ContentType:mimetypes.lookup(filePath)
@@ -43,3 +45,4 @@ async function init()
     })
   
 }
+init();

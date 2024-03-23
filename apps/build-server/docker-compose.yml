@@ -1,0 +1,7 @@
+version: '3'
+services:
+  build-server-service:
+    env_file:
+      - .env
+    image: pradeepkundekar1010/build-server
+    container_name: build-server-container
