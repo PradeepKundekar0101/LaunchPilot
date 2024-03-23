@@ -19,18 +19,19 @@ async function init()
     console.log("Executing script.js");
     const outdirpath = path.join(__dirname,"output");
     const p = exec(`cd ${outdirpath} && npm install && npm run build`)
-    p.stdout.on("data",()=>{
+    p.stdout.on("data",(data)=>{
         console.log(data.toString())
     })
 
-    p.stdout.on("error",()=>{
+    p.stdout.on("error",(data)=>{
         console.log("Error:"+data.toString())
     })
     p.stdout.on("close",async ()=>{
+        console.log("Build completed")
         const folderPath = path.join(__dirname,"output","dist");
         const distFolderContent = fs.readdirSync(folderPath,{recursive:true});
-        for( file of distFolderContent ){
-            const filePath = path.join(outdirpath,file)
+        for(const file of distFolderContent ){
+            const filePath = path.join(folderPath,file)
             if(fs.lstatSync(filePath).isDirectory())
                 continue
             console.log("Uploading "+filePath);

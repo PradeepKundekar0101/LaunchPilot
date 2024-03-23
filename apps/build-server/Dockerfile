@@ -10,11 +10,13 @@ RUN apt-get install -y nodejs
 RUN apt-get install -y git
 
 WORKDIR /home/app
+COPY package*.json .
+RUN npm install
+
 COPY main.sh .
 COPY script.js .
-COPY package*.json .
 
-RUN npm install
+
 RUN chmod +x main.sh
 RUN chmod +x script.js
 
