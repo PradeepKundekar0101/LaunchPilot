@@ -1,26 +1,30 @@
-const express = require("express");
-const randomWord = require("random-word-slugs");
-const dotenv = require("dotenv");
-const socketio = require("socket.io");
-const redis = require("ioredis");
-const http = require("http");
-const { ECSClient, RunTaskCommand } = require("@aws-sdk/client-ecs");
-const { getRunTaskConfig, getECSConfig } = require("./config");
+import { Request, Response } from "express";
+
+import express from "express";
+import randomWord from "random-word-slugs";
+import dotenv from "dotenv";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import Redis from "ioredis";
+import { ECSClient, RunTaskCommand } from "@aws-sdk/client-ecs";
+import { getRunTaskConfig, getECSConfig } from "./config";
+
 
 dotenv.config();
 const PORT = process.env.PORT || 8000;
-const REDIS_URI= process.env.REDIS_URI;
+const SOCKET_PORT = Number(process.env.SOCKET_PORT) || 8001;
+const REDIS_URI= process.env.REDIS_URI||"";
 
 const app = express();
-const httpServer = http.createServer();
-const io = new socketio.Server({cors:"*"});
 
-const subscriber = new redis.Redis(REDIS_URI);
+const io = new Server();
+
+const subscriber = new Redis(REDIS_URI);
 
 const initSubscriber = async ()=>{
 
   subscriber.psubscribe("logs:*");
-  subscriber.on("pmessage",(pattern,channel,message)=>{
+  subscriber.on("pmessage",(pattern:string,channel:string,message:string)=>{
     console.log("channel: "+channel);
     console.log("message:" +message);
     io.to(channel).emit("message",message);
@@ -30,7 +34,7 @@ initSubscriber();
 
 app.use(express.json());
 
-app.post("/deploy", async (req, res) => {
+app.post("/deploy", async (req:Request, res:Response) => {
   const { gitUrl } = req.body;
   const projectId = randomWord.generateSlug();
   const ecsClient = new ECSClient(getECSConfig());
@@ -42,13 +46,11 @@ app.listen(PORT, () => {
   console.log("API server running at port " + PORT);
 });
 
-io.on("connection",socket=>{
-  socket.on("subscribe",(channel)=>{
+io.on("connection",(socket:any) =>{
+  socket.on("subscribe",(channel:string)=>{
     socket.join(channel);
     socket.emit("message",`Joined ${channel}`);
   })
 })
 
-io.listen(process.env.SOCKET_PORT||8001,()=>{
-  console.log("Socket server started");
-})
+io.listen(SOCKET_PORT)
