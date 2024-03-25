@@ -9,7 +9,8 @@ const Redis = require("ioredis");
 dotenv.config();
 
 const PROJECT_ID = process.env.PROJECT_ID;
-const publisher = new Redis(process.env.REDIS_URI);
+const REDIS_URI = process.env.REDIS_URI;
+const publisher = new Redis(REDIS_URI);
 
 const publishLog = (log)=>{
     publisher.publish(`logs:${PROJECT_ID}`, JSON.stringify({log}) );
@@ -36,7 +37,7 @@ async function init()
     })
 
     p.stdout.on("error",(data)=>{
-        ppublishLog(`Error: ${data.toString()}`);
+        publishLog(`Error: ${data.toString()}`);
         console.log("Error:"+data.toString())
     })
     p.stdout.on("close",async ()=>{
@@ -59,6 +60,7 @@ async function init()
             publishLog("Deploying...")
             await s3client.send(command);
             publishLog(`Deployed 🎉`);
+            console.log("Deployed")
         }
     })
   

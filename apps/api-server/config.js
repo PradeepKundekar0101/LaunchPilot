@@ -1,4 +1,4 @@
-export const getRunTaskConfig = (gitUrl)=>{
+const getRunTaskConfig = (gitUrl,projectId)=>{
     return {
     count: 1,
     cluster: process.env.AWS_ECS_CLUSTER_ARN,
@@ -55,7 +55,7 @@ export const getRunTaskConfig = (gitUrl)=>{
   }
 
 }
-export const getECSConfig = ()=>{
+const getECSConfig = ()=>{
   return {
     region: process.env.AWS_REGION,
     credentials: {
@@ -64,3 +64,4 @@ export const getECSConfig = ()=>{
     },
   }
 }
+module.exports =  {getECSConfig,getRunTaskConfig};
