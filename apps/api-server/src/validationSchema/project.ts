@@ -3,7 +3,7 @@ const GitUrlRegex =
   /^(?:git|https?|git@)(:\/\/|:\/\/(?:[^@\/\n]+@)?)([\w.-]+)(?::|\/)([^\/\n]+\/[^\/\n]+)(?:\.git)?$/;
 
 export const projectSchema = z.object({
-  name: z
+  projectName: z
     .string({
       required_error: "Project Name is requried",
     })
@@ -16,9 +16,5 @@ export const projectSchema = z.object({
     })
     .trim()
     .regex(GitUrlRegex, {message:"Invalid github url"}),
-  subdomain: z
-    .string()
-    .min(3, "Atleast 3 characters")
-    .max(26, "Sub domain Maximum 26 character")
-    .optional(),
+
 });

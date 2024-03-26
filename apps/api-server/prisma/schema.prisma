@@ -8,10 +8,12 @@ datasource db {
 }
 
 model User {
-  id       String    @id @default(uuid())
-  email    String    @unique
-  password String
-  projects Project[]
+  id              String    @id @default(uuid())
+  userName        String    @map("user_name")
+  email           String    @unique
+  password        String
+  isEmailVerified Boolean   @default(false)
+  projects        Project[]
 }
 
 model Project {
@@ -19,5 +21,5 @@ model Project {
   projectName String @map("project_name")
   gitUrl      String @map("git_url")
   user        User   @relation(fields: [userId], references: [id])
-  userId      String
+  userId      String @default("")
 }

@@ -3,24 +3,27 @@ import { z, ZodError } from "zod";
 
 type SchemaType = z.ZodObject<any>;
 declare global {
-    namespace Express {
-        interface Request {
-            validatedData?: z.infer<SchemaType>;
-        }
+  namespace Express {
+    interface Request {
+      validatedData?: z.infer<SchemaType>;
     }
+  }
 }
 
-export const validateProject = (schema: SchemaType) => (req: Request, res: Response, next: NextFunction) => {
+export const validateProject =
+  (schema: SchemaType) => (req: Request, res: Response, next: NextFunction) => {
     try {
-        const validatedData = schema.parse(req.body);
-        req.validatedData = validatedData;
-        next();
+      const { gitUrl, projectName } = req.body;
+      schema.parse({ gitUrl, projectName });
+      next();
     } catch (error) {
-        if (error instanceof ZodError) {
-            res.status(400).json({ success: false, error: error.errors });
-        } else {
-            console.error("Error during validation:", error);
-            res.status(500).json({ success: false, error: "Internal server error" });
-        }
+      if (error instanceof ZodError) {
+        res.status(400).json({ success: false, message: error.errors[0].message });
+      } else {
+        console.error("Error during validation:", error);
+        res
+          .status(500)
+          .json({ success: false, error: "Internal server error" });
+      }
     }
-};
+  };

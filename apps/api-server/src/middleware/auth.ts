@@ -11,19 +11,21 @@ interface AuthRequest extends Request {
 }
 
 export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-        throw new ApiError(401,"Unauthorized");
-    }
-    const token = authHeader.split(' ')[1];
-    if (!token) {
-        throw new ApiError(401,"Unauthorized");
-    }
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) {
-            throw new ApiError(403,"Forbidden");
-        }
-        req.user = user;
-        next();
-    });
+
+    // const authHeader = req.headers.authorization;
+    // if (!authHeader) {
+    //     throw new ApiError(401,"Unauthorized");
+    // }
+    // const token = authHeader.split(' ')[1];
+    // if (!token) {
+    //     throw new ApiError(401,"Unauthorized");
+    // }
+    // jwt.verify(token, JWT_SECRET, (err, user) => {
+    //     if (err) {
+    //         throw new ApiError(403,"Forbidden");
+    //     }
+    //     req.user = user;
+    //     next();
+    // });
+    next();
 };

@@ -1,8 +1,10 @@
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
+    "user_name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
+    "isEmailVerified" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -12,7 +14,7 @@ CREATE TABLE "Project" (
     "id" TEXT NOT NULL,
     "project_name" TEXT NOT NULL,
     "git_url" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL DEFAULT '',
 
     CONSTRAINT "Project_pkey" PRIMARY KEY ("id")
 );
