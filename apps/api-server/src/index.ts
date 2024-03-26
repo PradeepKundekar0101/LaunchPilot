@@ -3,12 +3,11 @@ import { Request, Response } from "express";
 import express from "express";
 import randomWord from "random-word-slugs";
 import dotenv from "dotenv";
-import { createServer } from "http";
 import { Server } from "socket.io";
 import Redis from "ioredis";
 import { ECSClient, RunTaskCommand } from "@aws-sdk/client-ecs";
 import { getRunTaskConfig, getECSConfig } from "./config";
-
+import projectRoute from './routes/project'
 
 dotenv.config();
 const PORT = process.env.PORT || 8000;
@@ -22,7 +21,6 @@ const io = new Server();
 const subscriber = new Redis(REDIS_URI);
 
 const initSubscriber = async ()=>{
-
   subscriber.psubscribe("logs:*");
   subscriber.on("pmessage",(pattern:string,channel:string,message:string)=>{
     console.log("channel: "+channel);
@@ -33,7 +31,7 @@ const initSubscriber = async ()=>{
 initSubscriber();
 
 app.use(express.json());
-app.use("/api/v1/project",)
+app.use("/api/v1/project",projectRoute)
 
 app.post("/deploy", async (req:Request, res:Response) => {
   const { gitUrl } = req.body;
