@@ -1,13 +1,10 @@
-import { Request, Response } from "express";
-
 import express from "express";
-import randomWord from "random-word-slugs";
 import dotenv from "dotenv";
 import { Server } from "socket.io";
 import Redis from "ioredis";
-import { ECSClient, RunTaskCommand } from "@aws-sdk/client-ecs";
-import { getRunTaskConfig, getECSConfig } from "./config";
+
 import projectRoute from './routes/project'
+import userRoute from './routes/user'
 
 dotenv.config();
 const PORT = process.env.PORT || 8000;
@@ -32,15 +29,9 @@ initSubscriber();
 
 app.use(express.json());
 app.use("/api/v1/project",projectRoute)
+app.use("/api/v1/user",userRoute)
 
-app.post("/deploy", async (req:Request, res:Response) => {
-  const { gitUrl } = req.body;
-  const projectId = randomWord.generateSlug();
-  const ecsClient = new ECSClient(getECSConfig());
-  const command = new RunTaskCommand(getRunTaskConfig(gitUrl,projectId));
-  await ecsClient.send(command);
-  res.json({message:"QUEUED",data:`http://${projectId}.localhost:${PORT}`});
-});
+
 app.listen(PORT, () => {
   console.log("API server running at port " + PORT);
 });
