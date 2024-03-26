@@ -60,7 +60,8 @@ async function init()
             publishLog("Deploying...")
             await s3client.send(command);
             publishLog(`Deployed 🎉`);
-            console.log("Deployed")
+            console.log("Deployed");
+            process.exit(0);
         }
     })
   
