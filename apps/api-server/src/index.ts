@@ -33,6 +33,7 @@ const initSubscriber = async ()=>{
 initSubscriber();
 
 app.use(express.json());
+app.use("/api/v1/project",)
 
 app.post("/deploy", async (req:Request, res:Response) => {
   const { gitUrl } = req.body;
