@@ -7,7 +7,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
-const JWT_SECRET = "";
+const JWT_SECRET = process.env.JWT_SECRET||"";
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
     const { email, userName, password } = req.body;
@@ -61,5 +61,34 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     .status(201)
     .json(
       new ApiResponse(201, "User logged in", { user: existedUser, token }, true)
+    );
+});
+
+export const changePassword = asyncHandler(async (req: Request, res: Response) => {
+  const { curPassword, newPassword } = req.body;
+  if (!curPassword || !newPassword) throw new ApiError(400, "All fields are required");
+  const userId = req.params.userId;
+  const existedUser = await prisma.user.findUnique({
+    where: {
+      id:userId
+    },
+  });
+  if (!existedUser) {
+    throw new ApiError(404, "User not found");
+  }
+  const passwordCorrect = await bcrypt.compare(curPassword, existedUser.password);
+  if (!passwordCorrect) throw new ApiError(400, "Invalid current password");  
+  const hashNewPassword = await bcrypt.hash(newPassword,10);
+  await prisma.user.update({
+    where:{
+      id:userId
+    },data:{
+      password:hashNewPassword
+    }
+  })
+  return res
+    .status(201)
+    .json(
+      new ApiResponse(201, "Password Changed", { message: "Success" }, true)
     );
 });
