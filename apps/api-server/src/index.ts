@@ -20,8 +20,6 @@ const subscriber = new Redis(REDIS_URI);
 const initSubscriber = async ()=>{
   subscriber.psubscribe("logs:*");
   subscriber.on("pmessage",(pattern:string,channel:string,message:string)=>{
-    console.log("channel: "+channel);
-    console.log("message:" +message);
     io.to(channel).emit("message",message);
   })
 }
