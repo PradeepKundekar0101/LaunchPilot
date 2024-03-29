@@ -28,13 +28,20 @@ export const createProject = asyncHandler(
     res
       .status(200)
       .json(
-        new ApiResponse(200, "Project created successfully", { project }, true)
+        new ApiResponse(200, "Project created successfully", { projectId:project.id }, true)
       );
   }
 );
 export const deployProject = asyncHandler(
   async (req: Request, res: Response) => {
     const projectId = req.params.projectId;
+    const deployment = await prismaClient.deployment.create({
+      data:{
+        // project: {connect:{id:projectId}},
+        projectId: projectId,
+        status:"QUEUED"
+      }
+    })
     const project = await prismaClient.project.findUnique({
       where: {
         id: projectId,
@@ -49,7 +56,7 @@ export const deployProject = asyncHandler(
     await ecsClient.send(command);
     res.json({
       message: "QUEUED",
-      data: `http://${projectId}.localhost:${PORT}`,
+      data: {url:`http://${projectId}.localhost:${PORT}`,deploymentId:deployment.id},
     });
   }
 );

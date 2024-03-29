@@ -15,6 +15,7 @@ RUN npm install
 
 COPY main.sh .
 COPY script.js .
+COPY kafka-ca.pem kafka-ca.pem
 
 
 RUN chmod +x main.sh
