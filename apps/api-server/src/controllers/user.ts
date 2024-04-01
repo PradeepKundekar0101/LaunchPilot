@@ -29,7 +29,7 @@ export const registerUser = asyncHandler(
         email,
         password: hashPass,
       },
-    });
+    });1
     const token = jwt.sign({ id: user.id }, JWT_SECRET);
     if (!user)
       throw new ApiError(500, "Something went wrong while creating a user");
