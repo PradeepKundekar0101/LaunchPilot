@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from 'cors';
 import { Server } from "socket.io";
 import Redis from "ioredis";
 
@@ -26,6 +27,7 @@ const initSubscriber = async ()=>{
 initSubscriber();
 
 app.use(express.json());
+app.use(cors({origin:"*"}))
 app.use("/api/v1/project",projectRoute)
 app.use("/api/v1/user",userRoute)
 
