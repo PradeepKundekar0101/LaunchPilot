@@ -34,7 +34,7 @@ const router = createBrowserRouter([
   
   },
   {
-    path: "/signuo",
+    path: "/signup",
     element:( <Suspense fallback={<Loader />}>
     <SignupPage />
   </Suspense>)

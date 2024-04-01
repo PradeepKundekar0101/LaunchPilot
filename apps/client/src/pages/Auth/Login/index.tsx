@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import useAuthService from "../../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Formik, Field, ErrorMessage, FormikValues } from "formik";
-import { userSchema } from "../../../schema/userLogin";
+import { userLoginSchema } from "../../../schema/userLogin";
 
 interface LoginCredentials {
   email: string;
@@ -42,7 +42,7 @@ const index = () => {
       Login
       <Formik
         initialValues={credentials as any}
-        validationSchema={userSchema}
+        validationSchema={userLoginSchema}
         onSubmit={handleSubmit}
       >
         {({ isSubmitting, errors, handleSubmit }) => (
