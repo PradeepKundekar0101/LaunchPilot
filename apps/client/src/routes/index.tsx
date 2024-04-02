@@ -12,18 +12,29 @@ const VerificationEmailSentPage = lazy(() => import("../pages/Auth/VerifyEmail/e
 const EmailVerificationPage = lazy(()=>import("../pages/Auth/VerifyEmail"))
 const UserDashboard = lazy(() => import("../pages/UserDashboard"));
 const NotFound = lazy(() => import("../pages/NotFound"));
-
+const CreateProject =  lazy(() => import("../pages/UserDashboard/createProject"));
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
   },
   {
-    path: "/dashboard/:userId",
+    path: "/dashboard/",
     element: (
       <Suspense fallback={<Loader />}>
         <ProtectedRoute>
           <UserDashboard />
+        </ProtectedRoute>
+      </Suspense>
+    ),
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: "/dashboard/createProject",
+    element: (
+      <Suspense fallback={<Loader />}>
+        <ProtectedRoute>
+          <CreateProject />
         </ProtectedRoute>
       </Suspense>
     ),

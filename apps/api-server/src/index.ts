@@ -21,6 +21,8 @@ const subscriber = new Redis(REDIS_URI);
 const initSubscriber = async ()=>{
   subscriber.psubscribe("logs:*");
   subscriber.on("pmessage",(pattern:string,channel:string,message:string)=>{
+    console.log(message);
+    console.log(channel);
     io.to(channel).emit("message",message);
   })
 }
@@ -39,8 +41,9 @@ app.listen(PORT, () => {
 
 io.on("connection",(socket:any) =>{
   socket.on("subscribe",(channel:string)=>{
+    console.log("Joining channel:"+channel)
     socket.join(channel);
-    socket.emit("message",`Joined ${channel}`);
+    // socket.emit("message",JSON.stringify({log:`Joined ${channel}`}));
   })
 })
 
