@@ -16,12 +16,13 @@ enum DeploymentStatus {
 }
 
 model User {
-  id              String    @id @default(uuid())
-  userName        String    @map("user_name")
-  email           String    @unique
+  id              String       @id @default(uuid())
+  userName        String       @map("user_name")
+  email           String       @unique
   password        String
-  isEmailVerified Boolean   @default(false)
+  isEmailVerified Boolean      @default(false)
   projects        Project[]
+  EmailToken      EmailToken[]
 }
 
 model Project {
@@ -38,4 +39,12 @@ model Deployment {
   project   Project          @relation(fields: [projectId], references: [id])
   status    DeploymentStatus @default(NOT_STARTED)
   projectId String           @default("")
+}
+
+model EmailToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @default("")
+  createdAt DateTime @default(now())
 }
