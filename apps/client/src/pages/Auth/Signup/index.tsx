@@ -1,8 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import useAuthService from "../../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Formik, Field, ErrorMessage, FormikValues } from "formik";
 import { userRegisterSchema } from "../../../schema/userLogin";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { login } from "../../../store/slices/authSlice";
+import { useState } from "react";
 
 interface RegisterCredential {
   email: string;
@@ -10,25 +13,35 @@ interface RegisterCredential {
   password: string;
 }
 const index = () => {
+  const [loading,setLoading] = useState(false);
+  const token = useAppSelector((state)=>{return state.auth.token})
+  if(token)
+    return <Navigate to={"/"}/>
   const credentials: RegisterCredential = {
     email: "",
     password: "",
-    userName: "",
+    userName: ""
   };
-  const { loginUser } = useAuthService();
+
+  const { registerUser } = useAuthService();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { mutate } = useMutation({
     mutationKey: ["register"],
     mutationFn: async (values: RegisterCredential) => {
-      const { data } = await loginUser({
+      setLoading(true);
+      const { data } = await registerUser({
         email: values.email,
         password: values.password,
+        userName: values.userName
       });
-      return data.data;
+      setLoading(true);
+      return data;
     },
     onSuccess: (data) => {
-      alert("Login Success");
-      navigate(`/dashboard/${data.user._id}`);
+      alert("Registration Success");
+      dispatch(login(data.data));
+      navigate(`/verifyEmail`);
     },
     onError: (data) => {
       alert(data.message);
@@ -39,7 +52,7 @@ const index = () => {
       mutate({
         email: values.email,
         password: values.password,
-        userName: values.userName,
+        userName: values.userName
       });
     } catch (error) {}
   };
@@ -51,14 +64,15 @@ const index = () => {
         validationSchema={userRegisterSchema}
         onSubmit={handleSubmit}
       >
-        {({ isSubmitting, errors, handleSubmit }) => (
-          <form onSubmit={handleSubmit}>
+        {({  errors, handleSubmit, values }) => (
+
+          <form onSubmit={handleSubmit} className=" flex flex-col space-y-2 " >
             <label htmlFor="userName">
               UserName:
               <Field
                 type="text"
                 name="userName"
-                className={errors.userName ? " border-red-500 border-2" : ""}
+                className={  `${errors.userName && values.userName!==""} ? " border-red-500 border-2" : "" text-black `}
               />
               <ErrorMessage
                 name="userName"
@@ -71,7 +85,7 @@ const index = () => {
               <Field
                 type="email"
                 name="email"
-                className={errors.email ? " border-red-500 border-2" : ""}
+                className={`${errors.email} ? " border-red-500 border-2" : "" text-black`}
               />
               <ErrorMessage
                 name="email"
@@ -85,7 +99,7 @@ const index = () => {
               <Field
                 type="password"
                 name="password"
-                className={errors.password ? " border-red-500 border-2" : ""}
+                className={`${errors.password} ? " border-red-500 border-2" : "" text-black`}
               />
               <ErrorMessage
                 name="password"
@@ -94,7 +108,7 @@ const index = () => {
               />
             </label>
 
-            <button type="submit" disabled={isSubmitting}>
+            <button type="submit" disabled={loading}>
               Submit
             </button>
           </form>

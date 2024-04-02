@@ -1,14 +1,18 @@
 import { useMutation } from "@tanstack/react-query";
 import useAuthService from "../../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Formik, Field, ErrorMessage, FormikValues } from "formik";
 import { userLoginSchema } from "../../../schema/userLogin";
-
+import { useAppSelector } from "../../../store/hooks";
 interface LoginCredentials {
   email: string;
   password: string;
 }
 const index = () => {
+
+  const token = useAppSelector((state)=>{return state.auth.token})
+  if(token)
+    return <Navigate to={"/"}/>
   const credentials: LoginCredentials = {
     email: "",
     password: "",

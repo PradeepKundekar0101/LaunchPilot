@@ -7,6 +7,7 @@ import Redis from "ioredis";
 import projectRoute from './routes/project'
 import userRoute from './routes/user'
 
+
 dotenv.config();
 const PORT = process.env.PORT || 8000;
 const SOCKET_PORT = Number(process.env.SOCKET_PORT) || 8001;
@@ -15,7 +16,6 @@ const REDIS_URI= process.env.REDIS_URI||"";
 const app = express();
 
 const io = new Server();
-
 const subscriber = new Redis(REDIS_URI);
 
 const initSubscriber = async ()=>{
@@ -25,6 +25,7 @@ const initSubscriber = async ()=>{
   })
 }
 initSubscriber();
+
 
 app.use(express.json());
 app.use(cors({origin:"*"}))
