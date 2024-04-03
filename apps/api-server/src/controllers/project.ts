@@ -35,19 +35,18 @@ export const createProject = asyncHandler(
 export const deployProject = asyncHandler(
   async (req: Request, res: Response) => {
     const projectId = req.params.projectId;
-    const deployment = await prismaClient.deployment.create({
-      data:{
-        // project: {connect:{id:projectId}},
-        projectId: projectId,
-        status:"QUEUED"
-      }
-    })
     const project = await prismaClient.project.findUnique({
       where: {
         id: projectId,
       },
     });
     if (!project) throw new ApiError(404, "Project not found");
+    const deployment = await prismaClient.deployment.create({
+      data:{
+        projectId: projectId,
+        status:"QUEUED"
+      }
+    })
 
     const ecsClient = new ECSClient(getECSConfig());
     const command = new RunTaskCommand(
@@ -56,7 +55,27 @@ export const deployProject = asyncHandler(
     await ecsClient.send(command);
     res.json({
       message: "QUEUED",
-      data: {url:`http://${projectId}.localhost:${PORT}`,deploymentId:deployment.id},
+      data: {url:`http://${project.projectName}.localhost:${PORT}`,deploymentId:deployment.id},
     });
+  }
+);
+
+export const getAllProjects = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.userId;
+    const userIdProvided = req.params.userId;
+    if(userId!==userIdProvided){
+      throw new ApiError(403, "Forbidden");
+    }
+    const projects = await prismaClient.project.findMany({
+      where:{
+        userId
+      }
+    })
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, "Fetched Projects", { projects }, true)
+      );
   }
 );

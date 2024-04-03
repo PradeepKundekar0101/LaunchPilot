@@ -18,8 +18,17 @@ const useProjectApi = () => {
             throw new Error(error.response?error.response.data.message:error.message);
         }
     };
+    const getAllProjects = async (userId:string) => {
+        try {
+            const response = await api.get(`/project/${userId}`);
+            return response;
+        } catch (error:any) {
+            throw new Error(error.response?error.response.data.message:error.message);
+        }
+    };
 
-    return { createProject, deployProject };
+
+    return { createProject, deployProject,getAllProjects };
 };
 
 export default useProjectApi;

@@ -4,3 +4,9 @@ export interface User{
     userName:string,
     isEmailVerified?:boolean
 }
+export interface Project{
+    id:string,
+    projectName:string,
+    gitUrl:string,
+    userId:string
+}
