@@ -43,6 +43,7 @@ export const createProject = asyncHandler(
 export const deployProject = asyncHandler(
   async (req: Request, res: Response) => {
     const projectId = req.params.projectId;
+    const token  = req.headers.authorization?.split(" ")[1];
     const project = await prismaClient.project.findUnique({
       where: {
         id: projectId,
@@ -58,7 +59,7 @@ export const deployProject = asyncHandler(
 
     const ecsClient = new ECSClient(getECSConfig());
     const command = new RunTaskCommand(
-      getRunTaskConfig(project.gitUrl, project.projectName,deployment.id)
+      getRunTaskConfig(project.gitUrl, project.projectName,deployment.id,token!)
     );
     await ecsClient.send(command);
     res.json({

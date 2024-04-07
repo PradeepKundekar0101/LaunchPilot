@@ -15,6 +15,9 @@ const REDIS_URI= process.env.REDIS_URI||"";
 let deploymentId="";
 
 const app = express();
+app.get("/",(req,res)=>{
+  res.send("Hello from launch pilot");
+})
 
 const io = new Server();
 const subscriber = new Redis(REDIS_URI);
@@ -26,7 +29,6 @@ const initSubscriber = async ()=>{
   })
 }
 initSubscriber();
-
 
 app.use(express.json());
 app.use(cors({origin:"*"}))
@@ -43,7 +45,6 @@ io.on("connection",(socket:any) =>{
     console.log("Joining channel:"+channel)
     socket.join(channel);
     deploymentId = channel.split(":")[1];
-
     // socket.emit("message",JSON.stringify({log:`Joined ${channel}`}));
   })
 })
