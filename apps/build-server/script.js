@@ -4,18 +4,20 @@ const fs = require("fs");
 const mimetypes = require("mime-types");
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const dotenv = require("dotenv");
-// const Redis = require("ioredis");
+const Redis = require("ioredis");
 // const { Kafka } = require("kafkajs");
 dotenv.config();
 
 const PROJECT_ID = process.env.PROJECT_ID;
-// const REDIS_URI = process.env.REDIS_URI;
+const API_SERVER_URL = process.env.API_SERVER_URL;
+const REDIS_URI = process.env.REDIS_URI;
 const DEPLOYMENT_ID = process.env.DEPLOYMENT_ID;
+const JWT_TOKEN = process.env.JWT_TOKEN;
 // const KAFKA_BROKER = process.env.KAFKA_BROKER;
 // const SASL_USERNAME = process.env.SASL_USERNAME;
 // const SASL_PASSWORD = process.env.SASL_PASSWORD;
 
-// const publisher = new Redis(REDIS_URI);
+const publisher = new Redis(REDIS_URI);
 
 // const kafkaClient = new Kafka({
 //   brokers: [`${KAFKA_BROKER}`],
@@ -43,6 +45,19 @@ const publishLog = (log) => {
   // });
   publisher.publish(`logs:${DEPLOYMENT_ID}`, JSON.stringify({ log }));
 };
+const updateDeploymentStatus = async(status)=>{
+  const res = await fetch(`${API_SERVER_URL}/api/v1/project/deploy/${DEPLOYMENT_ID}`,{
+    method:"PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${JWT_TOKEN}`
+    },body: JSON.stringify({status})
+  })
+  const json = await res.json();
+  if(!json.success){
+    console.log("Status Updation failed");
+  }
+}
 
 const s3client = new S3Client({
   region: process.env.AWS_REGION,
@@ -51,9 +66,10 @@ const s3client = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
-
+let error = false;
 async function init() {
-  await producer.connect();
+  // await producer.connect();
+  await updateDeploymentStatus("IN_PROGRESS");
   console.log("Building project");
   publishLog("Building project...");
   const outdirpath = path.join(__dirname, "output");
@@ -65,17 +81,31 @@ async function init() {
   });
 
   p.stdout.on("error", async (data) => {
+    error = true;
     publishLog(`Error: ${data.toString()}`);
     console.log("Error:" + data.toString());
+    await updateDeploymentStatus("FAILED");
   });
   p.stdout.on("close", async () => {
-    console.log("Build completed");
-    publishLog("Build completed");
+    if(!error){
+      console.log("Build completed sucessfully");
+      publishLog("Build completed sucessfully");
+    }
+    else{
+      console.log("Error: Build Failed");
+      publishLog(`Error: Build failed`);
+      process.exit(0)
+    }
+    
+
     const folderPath = path.join(__dirname, "output", "dist");
     const distFolderContent = fs.readdirSync(folderPath, { recursive: true });
+
     for (const file of distFolderContent) {
       const filePath = path.join(folderPath, file);
-      if (fs.lstatSync(filePath).isDirectory()) continue;
+      if (fs.lstatSync(filePath).isDirectory()) 
+        continue;
+      publishLog("Deployment Started!");
       console.log("Uploading " + filePath);
       publishLog(`Uploading ${file}`);
       const command = new PutObjectCommand({
@@ -84,12 +114,13 @@ async function init() {
         Body: fs.createReadStream(filePath),
         ContentType: mimetypes.lookup(filePath),
       });
-      publishLog("Deploying...");
       await s3client.send(command);
-      publishLog(`Deployed 🎉`);
-      console.log("Deployed");
-      process.exit(0);
     }
+    
+    publishLog(`Deployed 🎉`);
+    console.log("Deployed");
+    await updateDeploymentStatus("DEPLOYED")
+    process.exit(0);
   });
 }
 init();

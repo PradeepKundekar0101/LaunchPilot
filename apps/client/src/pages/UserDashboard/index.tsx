@@ -22,7 +22,7 @@ const index = () => {
       <Link to="/dashboard/createProject">Create a project</Link>
       <h1>{isLoading}</h1>
       {
-        data && data.map((e:Project)=>{return <div><h1>{e.projectName}</h1></div>})
+        data && data.map((e:Project,index:number)=>{return <div key={index}><h1>{e.projectName}</h1></div>})
       }
         
         {/* {data.map((project:Project) =><div>

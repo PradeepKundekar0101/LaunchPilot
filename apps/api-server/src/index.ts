@@ -12,6 +12,7 @@ dotenv.config();
 const PORT = process.env.PORT || 8000;
 const SOCKET_PORT = Number(process.env.SOCKET_PORT) || 8001;
 const REDIS_URI= process.env.REDIS_URI||"";
+let deploymentId="";
 
 const app = express();
 
@@ -21,8 +22,6 @@ const subscriber = new Redis(REDIS_URI);
 const initSubscriber = async ()=>{
   subscriber.psubscribe("logs:*");
   subscriber.on("pmessage",(pattern:string,channel:string,message:string)=>{
-    console.log(message);
-    console.log(channel);
     io.to(channel).emit("message",message);
   })
 }
@@ -43,6 +42,8 @@ io.on("connection",(socket:any) =>{
   socket.on("subscribe",(channel:string)=>{
     console.log("Joining channel:"+channel)
     socket.join(channel);
+    deploymentId = channel.split(":")[1];
+
     // socket.emit("message",JSON.stringify({log:`Joined ${channel}`}));
   })
 })

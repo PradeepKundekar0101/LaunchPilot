@@ -65,7 +65,7 @@ const CreateProject = () => {
       });
       console.log("Project name"+details.projectName)
       console.log("New project name"+projectName)
-      socketRef.current.emit(Actions.SUBCRIBE,`logs:${projectName}`);
+      socketRef.current.emit(Actions.SUBCRIBE,`logs:${deploymentId}`);
       socketRef.current.on(
         Actions.MESSAGE,
         (message:any) => {

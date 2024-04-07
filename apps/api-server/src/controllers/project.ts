@@ -18,6 +18,14 @@ export const createProject = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { gitUrl, projectName } = req.body;
     const userId = req.userId;
+    const existingProject = await prismaClient.project.findFirst({
+      where:{
+        projectName
+      }
+    })
+    if(existingProject){
+      throw new ApiError(400,"Project with this name already exists");
+    }
     const project = await prismaClient.project.create({
       data: {
         projectName,
@@ -50,7 +58,7 @@ export const deployProject = asyncHandler(
 
     const ecsClient = new ECSClient(getECSConfig());
     const command = new RunTaskCommand(
-      getRunTaskConfig(project.gitUrl, project.projectName)
+      getRunTaskConfig(project.gitUrl, project.projectName,deployment.id)
     );
     await ecsClient.send(command);
     res.json({
@@ -76,6 +84,63 @@ export const getAllProjects = asyncHandler(
       .status(200)
       .json(
         new ApiResponse(200, "Fetched Projects", { projects }, true)
+      );
+  }
+);
+export const getDeploymentsByProjectID = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const projectId = req.params.projectId;
+    const deployments = await prismaClient.deployment.findMany({
+      where:{
+        projectId
+      }
+    })
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, "Fetched Deployments", { deployments }, true)
+      );
+  }
+);
+
+export const changeStatus = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+
+    const deploymentId = req.params.deployId;
+    const status = req.body.status;
+    const updatedDeployment = await prismaClient.deployment.update({
+      where:{
+        id:deploymentId
+      },
+      data:{
+        status
+      }
+    })
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, "Status updated", { updatedDeployment }, true)
+      );
+  }
+);
+
+
+export const checkProjectExists = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+
+    const projectId = req.params.projectId;
+
+    const exists = await prismaClient.project.findFirst({
+      where:{
+        id:projectId
+      }
+    })
+    if(exists)
+      throw new ApiError(400,"Project Already exists");
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, "Project does not exists",  {}, true)
       );
   }
 );
