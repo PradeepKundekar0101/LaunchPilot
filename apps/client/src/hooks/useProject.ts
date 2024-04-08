@@ -26,9 +26,17 @@ const useProjectApi = () => {
             throw new Error(error.response?error.response.data.message:error.message);
         }
     };
+    const getLogs = async (deployId:string) => {
+        try {
+            const response = await api.get(`/project/deploy/logs/${deployId}`);
+            return response;
+        } catch (error:any) {
+            throw new Error(error.response?error.response.data.message:error.message);
+        }
+    };
 
 
-    return { createProject, deployProject,getAllProjects };
+    return { createProject, deployProject,getAllProjects,getLogs};
 };
 
 export default useProjectApi;

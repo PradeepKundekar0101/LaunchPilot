@@ -165,7 +165,7 @@ export const getLogs = asyncHandler(async (req: AuthRequest, res: Response) => {
       `, [deployId]);
       
 
-      const logs = result.rows.map(row => row.log);
+      const logs = result.rows.map(row => {return {log:row.log,timestamp:row.timestamp}});
       
       res.status(200).json(new ApiResponse(200, "Logs retrieved successfully", { logs }, true));
   } catch (error:any) {

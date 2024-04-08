@@ -1,9 +1,9 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { Formik, Field, ErrorMessage, FormikValues } from "formik";
 import { projectSchema } from "../../schema/project";
 import useProjectApi from "../../hooks/useProject";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { initSocket } from "../../socket/initSocket";
 import { Actions } from "../../socket/actions";
 import { Link } from "react-router-dom";
@@ -14,20 +14,33 @@ interface ProjectDetails {
 }
 const CreateProject = () => {
   const socketRef = useRef<any>(null);
-  const [logs, setLogs] = useState<string[]>([]);
+  const [logs, setLogs] = useState<{log:string,timestamp:string}[]>([]);
   const [deploymentUrl, setDeploymentUrl] = useState("");
-  const [projectName,setProjectName] = useState("");
+  const [deploymentId, setDeploymentId] = useState("");
+  const [projectName, setProjectName] = useState("");
   const details: ProjectDetails = {
     projectName: "",
     gitHubUrl: "",
   };
 
-  const { createProject, deployProject } = useProjectApi();
+  const { createProject, deployProject,getLogs } = useProjectApi();
+
+  // const {data:logData,refetch:refetchLogs} = useQuery({
+  //   queryKey:["logs"],
+  //   queryFn:async()=>{
+  //     if(deploymentId==="")
+  //       return null;
+  //     const {data} = await getLogs(deploymentId);
+      
+  //     return data.data.logs;
+  //   }
+  // })
+
 
   const { mutate: mutateCreateProject } = useMutation({
     mutationKey: ["create_project"],
     mutationFn: async (values: ProjectDetails) => {
-        setProjectName(values.projectName);
+      setProjectName(values.projectName);
       const { data } = await createProject(
         values.gitHubUrl,
         values.projectName
@@ -48,37 +61,45 @@ const CreateProject = () => {
       const { data } = await deployProject(projectId);
       return data.data;
     },
-    onSuccess: async (data) => {  
+    onSuccess: async (data) => {
       const { deploymentId, url } = data;
       setDeploymentUrl(url);
-      socketRef.current =await  initSocket();
-      if (!socketRef.current) return alert("Socket connection failed");
-      socketRef.current.on("connect_error", (err: string) => {
-        console.log("Connection error");
-        console.log(err)
-        alert(err);
-      });
-      socketRef.current.on("connect_failed", (err: string) => {
-        console.log("Connection failed erro");
-        console.log(err)
-        alert(err);
-      });
-      console.log("Project name"+details.projectName)
-      console.log("New project name"+projectName)
-      socketRef.current.emit(Actions.SUBCRIBE,`logs:${deploymentId}`);
-      socketRef.current.on(
-        Actions.MESSAGE,
-        (message:any) => {
-          let prevLog = logs;
-          prevLog.push("Hello");
-          setLogs(prevLogs => [...prevLogs, JSON.parse(message).log]);
-          console.log(logs)
-        }
-      );
+      setDeploymentId(deploymentId);
+      setInterval(async()=>{
+        const res = await getLogs(deploymentId);
+
+        const tlogs= res.data.data.logs;
+        const sortedLogs = [...tlogs].sort(
+          (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+        console.log(sortedLogs)
+        setLogs(sortedLogs);
+
+
+      },2000);
+      // socketRef.current = await initSocket();
+      // if (!socketRef.current) return alert("Socket connection failed");
+      // socketRef.current.on("connect_error", (err: string) => {
+      //   console.log("Connection error");
+      //   console.log(err);
+      //   alert(err);
+      // });
+      // socketRef.current.on("connect_failed", (err: string) => {
+      //   console.log("Connection failed erro");
+      //   console.log(err);
+      //   alert(err);
+      // });
+      // console.log("Project name" + details.projectName);
+      // console.log("New project name" + projectName);
+      // socketRef.current.emit(Actions.SUBCRIBE, `logs:${deploymentId}`);
+      // socketRef.current.on(Actions.MESSAGE, (message: any) => {
+      //   setLogs((prevLogs) => [...prevLogs, JSON.parse(message).log]);
+      //   console.log(logs);
+      // });
     },
     onError: (data) => {
-        console.log("On error");
-        console.log(data);
+      console.log("On error");
+      console.log(data);
       alert(data.message);
     },
   });
@@ -95,6 +116,11 @@ const CreateProject = () => {
       });
     } catch (error) {}
   };
+  // useEffect(() => {
+  //   refetchLogs();
+  //   setLogs(logData);
+  // }, [deploymentId])
+  
   return (
     <div>
       Login
@@ -144,10 +170,12 @@ const CreateProject = () => {
         <Link to={deploymentUrl}>{deploymentUrl}</Link>
       </h1>
       <ul>
-      {logs.map((log,ind) => ( <li key={ind} className="text-white">{log}</li>
-      ))}
+        {logs && logs.map((log, ind) => (
+          <li key={ind} className="text-white">
+             {JSON.parse(log.log).log+" "+log.timestamp}
+          </li>
+        ))}
       </ul>
-     
     </div>
   );
 };
