@@ -8,11 +8,11 @@ datasource db {
 }
 
 enum DeploymentStatus {
+  NOT_STARTED
   QUEUED
   IN_PROGRESS
-  READY
   FAILED
-  NOT_STARTED
+  DEPLOYED
 }
 
 model User {

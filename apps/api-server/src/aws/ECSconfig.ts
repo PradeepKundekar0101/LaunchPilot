@@ -1,6 +1,6 @@
 import { AssignPublicIp, LaunchType } from "@aws-sdk/client-ecs"
 
-export const getRunTaskConfig = (gitUrl:string,projectName:string)=>{
+export const getRunTaskConfig = (gitUrl:string,projectName:string,deploymentId:string,token:string)=>{
     return {
     count: 1,
     cluster: process.env.AWS_ECS_CLUSTER_ARN!,
@@ -32,12 +32,24 @@ export const getRunTaskConfig = (gitUrl:string,projectName:string)=>{
                 value:projectName
             },
             {
+              name:"DEPLOYMENT_ID",
+              value:deploymentId
+          },
+            {
                 name:"GIT_REPO_URL",
                 value:gitUrl
             },
             {
               name:"REDIS_URI",
               value: process.env.REDIS_URI!
+            },
+            {
+              name:"JWT_TOKEN",
+              value: token
+            },
+            {
+              name:"API_SERVER_URL",
+              value: process.env.API_SERVER_URL
             }
           ],
         },

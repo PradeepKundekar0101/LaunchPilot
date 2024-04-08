@@ -3,5 +3,5 @@ services:
   build-server-service:
     env_file:
       - .env
-    image: pradeepkundekar0101/build-server
+    image: pradeepkundekar0101/build-server:latest
     container_name: build-server-container
