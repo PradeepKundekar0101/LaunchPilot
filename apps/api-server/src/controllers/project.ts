@@ -5,6 +5,7 @@ import { PrismaClient } from "@prisma/client";
 import { ApiError } from "../utils/ApiError";
 import { ECSClient, RunTaskCommand } from "@aws-sdk/client-ecs";
 import { getECSConfig, getRunTaskConfig } from "../aws/ECSconfig";
+import { cassandraClient } from "../services/cassandraClient";
 const PORT = process.env.PORT;
 const prismaClient = new PrismaClient();
 
@@ -145,3 +146,30 @@ export const checkProjectExists = asyncHandler(
       );
   }
 );
+
+export const getLogs = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const deployId = req.params.deployId;
+
+  const exists = await prismaClient.deployment.findUnique({
+      where: {
+          id: deployId
+      }
+  });
+  if (!exists) {
+      throw new ApiError(404, "Deployment does not exist");
+  }
+
+  try {
+      const result = await cassandraClient.execute(`
+          SELECT * FROM default_keyspace.Logs WHERE deploymentId = ? ALLOW FILTERING;
+      `, [deployId]);
+      
+
+      const logs = result.rows.map(row => row.log);
+      
+      res.status(200).json(new ApiResponse(200, "Logs retrieved successfully", { logs }, true));
+  } catch (error:any) {
+      console.error("Error retrieving logs:", error.message);
+      throw new ApiError(500, "Internal Server Error");
+  }
+});
