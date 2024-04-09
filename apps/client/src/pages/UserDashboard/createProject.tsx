@@ -4,8 +4,6 @@ import { Formik, Field, ErrorMessage, FormikValues } from "formik";
 import { projectSchema } from "../../schema/project";
 import useProjectApi from "../../hooks/useProject";
 import { useEffect, useRef, useState } from "react";
-import { initSocket } from "../../socket/initSocket";
-import { Actions } from "../../socket/actions";
 import { Link } from "react-router-dom";
 
 interface ProjectDetails {
@@ -24,18 +22,6 @@ const CreateProject = () => {
   };
 
   const { createProject, deployProject,getLogs } = useProjectApi();
-
-  // const {data:logData,refetch:refetchLogs} = useQuery({
-  //   queryKey:["logs"],
-  //   queryFn:async()=>{
-  //     if(deploymentId==="")
-  //       return null;
-  //     const {data} = await getLogs(deploymentId);
-      
-  //     return data.data.logs;
-  //   }
-  // })
-
 
   const { mutate: mutateCreateProject } = useMutation({
     mutationKey: ["create_project"],
@@ -65,37 +51,21 @@ const CreateProject = () => {
       const { deploymentId, url } = data;
       setDeploymentUrl(url);
       setDeploymentId(deploymentId);
-      setInterval(async()=>{
+      const startTime = Date.now();
+      const interval = setInterval(async()=>{
         const res = await getLogs(deploymentId);
 
         const tlogs= res.data.data.logs;
         const sortedLogs = [...tlogs].sort(
           (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
         );
-        console.log(sortedLogs)
+        const currTime = Date.now();
         setLogs(sortedLogs);
-
+        const status = res.data.data.deploymentStatus;
+        if(status==="FAIL" || status==="DEPLOYED" || currTime-startTime>60000 * 5 )
+          clearInterval(interval);
 
       },2000);
-      // socketRef.current = await initSocket();
-      // if (!socketRef.current) return alert("Socket connection failed");
-      // socketRef.current.on("connect_error", (err: string) => {
-      //   console.log("Connection error");
-      //   console.log(err);
-      //   alert(err);
-      // });
-      // socketRef.current.on("connect_failed", (err: string) => {
-      //   console.log("Connection failed erro");
-      //   console.log(err);
-      //   alert(err);
-      // });
-      // console.log("Project name" + details.projectName);
-      // console.log("New project name" + projectName);
-      // socketRef.current.emit(Actions.SUBCRIBE, `logs:${deploymentId}`);
-      // socketRef.current.on(Actions.MESSAGE, (message: any) => {
-      //   setLogs((prevLogs) => [...prevLogs, JSON.parse(message).log]);
-      //   console.log(logs);
-      // });
     },
     onError: (data) => {
       console.log("On error");
@@ -116,11 +86,6 @@ const CreateProject = () => {
       });
     } catch (error) {}
   };
-  // useEffect(() => {
-  //   refetchLogs();
-  //   setLogs(logData);
-  // }, [deploymentId])
-  
   return (
     <div>
       Login
