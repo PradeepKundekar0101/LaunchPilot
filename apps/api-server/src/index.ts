@@ -53,7 +53,7 @@ const initSubscriber = async ()=>{
         `INSERT INTO default_keyspace.Logs (event_id, deploymentId, log, timestamp) VALUES (?, ?, ?, toTimestamp(now()));`,
         [uuid(), deploymentId, message]
     );
-    console.log("Inserted");
+    console.log("Inserted in Logs DB");
     } catch (error:any) {
       console.log(error.message)
     }
