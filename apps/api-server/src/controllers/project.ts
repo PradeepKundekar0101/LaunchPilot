@@ -6,6 +6,8 @@ import { ApiError } from "../utils/ApiError";
 import { ECSClient, RunTaskCommand } from "@aws-sdk/client-ecs";
 import { getECSConfig, getRunTaskConfig } from "../aws/ECSconfig";
 import { cassandraClient } from "../services/cassandraClient";
+import AWS from "aws-sdk"
+import { getSQSConfig } from "../aws/SQSconfig";
 const PORT = process.env.PORT;
 const prismaClient = new PrismaClient();
 
@@ -51,21 +53,42 @@ export const deployProject = asyncHandler(
       },
     });
     if (!project) throw new ApiError(404, "Project not found");
+    
     const deployment = await prismaClient.deployment.create({
       data:{
         projectId: projectId,
         status:"QUEUED"
       }
     })
+    //Insert the message in SQS
+    const sqsClient = new AWS.SQS(getSQSConfig());
+    //parameter to send message
+    const paramsSendMessage = {
+      MessageBody: JSON.stringify({
+        gitUrl:project.gitUrl,
+        projectName:project.projectName,
+        deploymentId:deployment.id,
+        token
+      }),
+      QueueUrl: process.env.AWS_SQS_URL!,
+    };
 
-    const ecsClient = new ECSClient(getECSConfig());
-    const command = new RunTaskCommand(
-      getRunTaskConfig(project.gitUrl, project.projectName,deployment.id,token!)
-    );
-    await ecsClient.send(command);
+    sqsClient.sendMessage(paramsSendMessage,(err,data)=>{
+      if (err) {
+        console.log('Error', err);
+      } else {
+        console.log('Successfully added message', data.MessageId);
+      }
+    })
+
+    // const ecsClient = new ECSClient(getECSConfig());
+    // const command = new RunTaskCommand(
+    //   getRunTaskConfig(project.gitUrl, project.projectName,deployment.id,token!)
+    // );
+    // await ecsClient.send(command);
     res.json({
       message: "QUEUED",
-      data: {url:`http://${project.projectName}.localhost:${PORT}`,deploymentId:deployment.id},
+      data: {url:`http://${project.projectName}.localhost:${3000}`,deploymentId:deployment.id},
     });
   }
 );
@@ -150,12 +173,12 @@ export const checkProjectExists = asyncHandler(
 export const getLogs = asyncHandler(async (req: AuthRequest, res: Response) => {
   const deployId = req.params.deployId;
 
-  const exists = await prismaClient.deployment.findUnique({
+  const deployement = await prismaClient.deployment.findUnique({
       where: {
           id: deployId
       }
   });
-  if (!exists) {
+  if (!deployement) {
       throw new ApiError(404, "Deployment does not exist");
   }
 
@@ -163,11 +186,11 @@ export const getLogs = asyncHandler(async (req: AuthRequest, res: Response) => {
       const result = await cassandraClient.execute(`
           SELECT * FROM default_keyspace.Logs WHERE deploymentId = ? ALLOW FILTERING;
       `, [deployId]);
-      
+     
 
-      const logs = result.rows.map(row => row.log);
+      const logs = result.rows.map(row => {return {log:row.log,timestamp:row.timestamp}});
       
-      res.status(200).json(new ApiResponse(200, "Logs retrieved successfully", { logs }, true));
+      res.status(200).json(new ApiResponse(200, "Logs retrieved successfully", {deploymentStatus:deployement.status, logs }, true));
   } catch (error:any) {
       console.error("Error retrieving logs:", error.message);
       throw new ApiError(500, "Internal Server Error");

@@ -17,6 +17,7 @@ const JWT_TOKEN = process.env.JWT_TOKEN;
 const publisher = new Redis(REDIS_URI);
 
 const publishLog = (log) => {
+  console.log(`publishing log: logs:${DEPLOYMENT_ID}` )
   publisher.publish(`logs:${DEPLOYMENT_ID}`, JSON.stringify({ log }));
 };
 
@@ -84,7 +85,7 @@ function buildCode(outdirpath) {
     
         const folderPath = path.join(__dirname, "output", "dist");
         const distFolderContent = fs.readdirSync(folderPath, { recursive: true });
-    
+        console.log(process)
         for (const file of distFolderContent) {
           const filePath = path.join(folderPath, file);
           if (fs.lstatSync(filePath).isDirectory()) continue;
