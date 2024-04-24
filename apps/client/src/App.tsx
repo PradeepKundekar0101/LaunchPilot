@@ -1,39 +1,20 @@
-
-import ButtonGradient from "./assets/svg/ButtonGradient";
-
-import Benefits from "./components/Benefits";
-
-import Collaboration from "./components/Collaboration";
-
-import Footer from "./components/Footer";
-
-import Header from "./components/Header";
-
-import Hero from "./components/Hero";
-
-import Pricing from "./components/Pricing";
-
-import Roadmap from "./components/Roadmap";
-
-import Services from "./components/Services";
-
-
+import { NavigationMenuDemo } from "./components/ui/navbar";
 const App = () => {
   return (
-    <>
-      <div className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden">
-        <Header />
-        <Hero />
-        <Benefits />
-        <Collaboration />
-        <Services />
-        <Pricing />
-        <Roadmap />
-        <Footer />
+    <section>
+      <NavigationMenuDemo />
+      <div className=" h-screen absolute top-[50px] inline-flex  inset-0 justify-center">
+        <div className="absolute top-[50px] inline-flex  inset-0 justify-center">
+          <div className="bg-shape1  opacity-50 bg-blur"></div>
+          {/* <div className="bg-shape2 bg-blue-400 opacity-50 bg-blur"></div>
+          <div className="bg-shape1 bg-purple-400 opacity-50 bg-blur"></div> */}
+        </div>
+        <div>
+          <h1 className="text-xl  text-center" >Launch Pilot </h1>
+          <h1 className="text-xl  text-center" >Launch Pilot </h1>
+        </div>
       </div>
-
-      <ButtonGradient />
-    </>
+    </section>
   );
 };
 

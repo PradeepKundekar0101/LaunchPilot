@@ -7,18 +7,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { useState } from "react";
 import { login } from "../../../store/slices/authSlice";
 
-import Section from "../../../components/Section";
-import Heading from "../../../components/Heading";
-import { service1, service2, service3, check } from "../../../assets";
-import { brainwaveServices, brainwaveServicesIcons } from "../../../constants";
-import {
-  PhotoChatMessage,
-  Gradient,
-  VideoBar,
-  VideoChatMessage,
-} from "../../../components/design/Services";
 
-import Generating from "../../../components/Generating";
 interface LoginCredentials {
   email: string;
   password: string;
@@ -66,24 +55,6 @@ const index = () => {
   };
   return (
     <div>
-      <Section id="how-to-use">
-        <div className="container">
-          <Heading
-            title="Login here"
-            text="Brainwave unlocks the potential of AI-powered applications"
-          />
-
-          <div className="relative overflow-y-hidden">
-            <div className="relative z-1 flex items-center h-[39rem] mb-5 p-8 border border-n-1/10 rounded-3xl overflow-hidden lg:p-20 xl:h-[46rem]">
-              <div className="absolute top-0 left-0 w-full h-full pointer-events-none md:w-3/5 xl:w-auto">
-                <img
-                  className="w-full h-full object-cover md:object-right"
-                  width={800}
-                  alt="Smartest AI"
-                  height={730}
-                  src={service1}
-                />
-              </div>
 
               <div className="relative z-1 max-w-[17rem] ml-auto">
                 <Formik
@@ -130,11 +101,8 @@ const index = () => {
               </div>
             </div>
 
-            {/* <Gradient /> */}
-          </div>
-        </div>
-      </Section>
-    </div>
+        
+
   );
 };
 

@@ -5,10 +5,8 @@ import { projectSchema } from "../../schema/project";
 import useProjectApi from "../../hooks/useProject";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { service1, service2, service3 } from "../../assets";
-import Section from "../../components/Section";
-import Heading from "../../components/Heading";
-import Button from "../../components/Button";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface ProjectDetails {
   projectName: string;
@@ -20,10 +18,12 @@ const CreateProject = () => {
   const [deploymentUrl, setDeploymentUrl] = useState("");
   const [deploymentId, setDeploymentId] = useState("");
   const [projectName, setProjectName] = useState("");
-  const [env,setEnv] = useState<{key:string,value:string}[]>([{
-    key:"",
-    value:""
-  }]);
+  const [env, setEnv] = useState<{ key: string; value: string }[]>([
+    {
+      key: "",
+      value: "",
+    },
+  ]);
   const details: ProjectDetails = {
     projectName: "",
     gitHubUrl: "",
@@ -99,135 +99,113 @@ const CreateProject = () => {
     } catch (error) {}
   };
   return (
-    <div>
-      <Section id="create-project">
-        <div className="container">
-          <Heading
-            title="Create a new Project"
-            text="Create a new project and get it deployed!"
-          />
+    <div className="  ">
 
-          <div className="relative overflow-y-hidden">
-            <div className="w-full relative z-1 flex items-center h-[39rem] mb-5 p-8 border border-n-1/10 rounded-3xl overflow-hidden md:p-20 xl:h-[46rem]">
-              <div className="absolute top-0 left-0 w-full h-full pointer-events-none md:w-1/2 xl:w-auto overflow-x-hidden">
-                <img
-                  className="object-cover h-full lg:object-right"
-                  width={800}
-                  alt="Create Project"
-                  height={730}
-                  src={service3}
+        <Formik
+          initialValues={details as any}
+          validationSchema={projectSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ isSubmitting, errors, handleSubmit }) => (
+            <form
+              className="  flex flex-col space-y-4 "
+              onSubmit={handleSubmit}
+            >
+              <label htmlFor="Project Name" className="">
+                <span className="my-2">Project Name</span>
+                <Field
+                  type="text"
+                  name="projectName"
+                  className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
                 />
+                <ErrorMessage
+                  name="projectName"
+                  component="div"
+                  className=" text-red-600"
+                />
+              </label>
+
+              <label htmlFor="gitHubUrl">
+                GitHub URL
+               
+                <Field
+                  type="text"
+                  name="gitHubUrl"
+                  className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
+                />
+                <ErrorMessage
+                  name="gitHubUrl"
+                  component="div"
+                  className=" text-red-600"
+                />
+              </label>
+
+              <label htmlFor="gitHubUrl">
+                Path
+                <Field
+                  type="text"
+                  name="gitHubUrl"
+                  className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
+                />
+                <ErrorMessage
+                  name="gitHubUrl"
+                  component="div"
+                  className=" text-red-600"
+                />
+              </label>
+              {env.map((e) => (
+                <div className="flex flex-col space-y-2 w-full">
+                  <div className="flex space-x-2">
+                    <label htmlFor="gitHubUrl">
+                      Key
+                      <Field
+                        type="text"
+                        name="gitHubUrl"
+                        className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
+                      />
+                      <ErrorMessage
+                        name="gitHubUrl"
+                        component="div"
+                        className=" text-red-600"
+                      />
+                    </label>
+                    <label htmlFor="gitHubUrl">
+                      VaLue
+
+                      <Field
+                        type="text"
+                        name="gitHubUrl"
+                        className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
+                      />
+                      <ErrorMessage
+                        name="gitHubUrl"
+                        component="div"
+                        className=" text-red-600"
+                      />
+                    </label>
+                  </div>
+                </div>
+              ))}
+              <div className="w-full flex justify-end">
+                <button
+                  onClick={() => {
+                    setEnv((prev) => [...prev, { key: "", value: "" }]);
+                  }}
+                  className=" bg-purple-600 items-center py-2 px-4 justify-end "
+                >
+                  Add another value
+                </button>
               </div>
 
-              <div className="relative z-1 w-1/2 h-full px-10  ml-auto overflow-y-scroll">
-                <Formik
-                  initialValues={details as any}
-                  validationSchema={projectSchema}
-                  onSubmit={handleSubmit}
-                >
-                  {({ isSubmitting, errors, handleSubmit }) => (
-                    <form className="  flex flex-col space-y-4 " onSubmit={handleSubmit}>
-                      <label htmlFor="Project Name" className="">
-                        <span className="my-2">
-                          Project Name
-                        </span>
-                        <Field
-                          type="text"
-                          name="projectName"
-                          className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
-                        />
-                        <ErrorMessage
-                          name="projectName"
-                          component="div"
-                          className=" text-red-600"
-                        />
-                      </label>
-
-                      <label htmlFor="gitHubUrl">
-                        GitHub URL
-                        <Field
-                          type="text"
-                          name="gitHubUrl"
-                          className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2` }
-                        />
-                        <ErrorMessage
-                          name="gitHubUrl"
-                          component="div"
-                          className=" text-red-600"
-                        />
-                      </label>
-
-                      <label htmlFor="gitHubUrl">
-                        Path
-                        <Field
-                          type="text"
-                          name="gitHubUrl"
-                          className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2` }
-                        />
-                        <ErrorMessage
-                          name="gitHubUrl"
-                          component="div"
-                          className=" text-red-600"
-                        />
-                      </label>
-                      {
-                        env.map((e)=> <div className="flex flex-col space-y-2 w-full">
-                          <div className="flex space-x-2">
-
-                         
-                            <label htmlFor="gitHubUrl">
-                        Key
-                        <Field
-                          type="text"
-                          name="gitHubUrl"
-                          className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2` }
-                        />
-                        <ErrorMessage
-                          name="gitHubUrl"
-                          component="div"
-                          className=" text-red-600"
-                        />
-                      </label>
-                      <label htmlFor="gitHubUrl">
-                        VaLue
-                        <Field
-                          type="text"
-                          name="gitHubUrl"
-                          className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2` }
-                        />
-                        <ErrorMessage
-                          name="gitHubUrl"
-                          component="div"
-                          className=" text-red-600"
-                        />
-                      </label>
-                      </div>
-                     
-                     
-                        </div>)
-                      }
-                       <div className="w-full flex justify-end">
-                      <button onClick={()=>{setEnv((prev)=>[...prev,{key:"",value:""}])}} className=" bg-purple-600 items-center py-2 px-4 justify-end ">Add another value</button>
-                      </div>
-
-                        <Button white={true}>
-                          Submit
-                        </Button>
-                      
-                      {/* <button type="submit" disabled={isSubmitting}>
+              <Button type="submit" variant="outline">Submit</Button>
+              {/* <button type="submit" disabled={isSubmitting}>
                         Submit
                       </button> */}
-                    </form>
-                  )}
-                </Formik>
-              </div>
-            </div>
+            </form>
+          )}
+        </Formik>
 
 
-          </div>
-        </div>
-      </Section>
-      Login
       <h1 className="text-white">
         {" "}
         <Link to={deploymentUrl}>{deploymentUrl}</Link>
