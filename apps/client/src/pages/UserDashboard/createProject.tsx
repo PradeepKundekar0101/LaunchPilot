@@ -1,32 +1,34 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { Formik, Field, ErrorMessage, FormikValues } from "formik";
 import { projectSchema } from "../../schema/project";
 import useProjectApi from "../../hooks/useProject";
-import { useEffect, useRef, useState } from "react";
+import {   useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 
 interface ProjectDetails {
   projectName: string;
   gitHubUrl: string;
+  // path:string;
 }
 const CreateProject = () => {
-  const socketRef = useRef<any>(null);
+  // const socketRef = useRef<any>(null);
   const [logs, setLogs] = useState<{ log: string; timestamp: string }[]>([]);
   const [deploymentUrl, setDeploymentUrl] = useState("");
   const [deploymentId, setDeploymentId] = useState("");
   const [projectName, setProjectName] = useState("");
-  const [env, setEnv] = useState<{ key: string; value: string }[]>([
-    {
-      key: "",
-      value: "",
-    },
-  ]);
+  // const [env, setEnv] = useState<{ key: string; value: string }[]>([
+  //   {
+  //     key: "",
+  //     value: "",
+  //   },
+  // ]);
   const details: ProjectDetails = {
     projectName: "",
     gitHubUrl: "",
+    // path:"",
   };
 
   const { createProject, deployProject, getLogs } = useProjectApi();
@@ -95,116 +97,116 @@ const CreateProject = () => {
       mutateCreateProject({
         projectName: values.projectName,
         gitHubUrl: values.gitHubUrl,
+        // path:values.path
       });
     } catch (error) {}
   };
   return (
-    <div className="  ">
+    <section className=" flex justify-center ">
+      <div className="w-1/2 ">
+        <h1 className="">Create a new project</h1>
+      <Formik
+        initialValues={details as any}
+        validationSchema={projectSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ isSubmitting, errors, handleSubmit }) => (
+          <form className="  flex flex-col space-y-4 " onSubmit={handleSubmit}>
+            <label htmlFor="Project Name" className="">
+              <span className="my-2">Project Name</span>
+              <Field
+                type="text"
+                name="projectName"
+                className={`border-[0.7px] border-[#424242]  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
+              />
+              <ErrorMessage
+                name="projectName"
+                component="div"
+                className=" text-red-600"
+              />
+            </label>
 
-        <Formik
-          initialValues={details as any}
-          validationSchema={projectSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ isSubmitting, errors, handleSubmit }) => (
-            <form
-              className="  flex flex-col space-y-4 "
-              onSubmit={handleSubmit}
-            >
-              <label htmlFor="Project Name" className="">
-                <span className="my-2">Project Name</span>
-                <Field
-                  type="text"
-                  name="projectName"
-                  className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
-                />
-                <ErrorMessage
-                  name="projectName"
-                  component="div"
-                  className=" text-red-600"
-                />
-              </label>
+            <label htmlFor="gitHubUrl">
+              GitHub URL
+              <Field
+                type="text"
+                name="gitHubUrl"
+                className={`border-[0.7px] border-[#424242]  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
+              />
+              <ErrorMessage
+                name="gitHubUrl"
+                component="div"
+                className=" text-red-600"
+              />
+            </label>
 
-              <label htmlFor="gitHubUrl">
-                GitHub URL
-               
-                <Field
-                  type="text"
-                  name="gitHubUrl"
-                  className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
-                />
-                <ErrorMessage
-                  name="gitHubUrl"
-                  component="div"
-                  className=" text-red-600"
-                />
-              </label>
-
-              <label htmlFor="gitHubUrl">
-                Path
-                <Field
-                  type="text"
-                  name="gitHubUrl"
-                  className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
-                />
-                <ErrorMessage
-                  name="gitHubUrl"
-                  component="div"
-                  className=" text-red-600"
-                />
-              </label>
-              {env.map((e) => (
-                <div className="flex flex-col space-y-2 w-full">
-                  <div className="flex space-x-2">
-                    <label htmlFor="gitHubUrl">
-                      Key
-                      <Field
-                        type="text"
-                        name="gitHubUrl"
-                        className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
-                      />
-                      <ErrorMessage
-                        name="gitHubUrl"
-                        component="div"
-                        className=" text-red-600"
-                      />
-                    </label>
-                    <label htmlFor="gitHubUrl">
-                      VaLue
-
-                      <Field
-                        type="text"
-                        name="gitHubUrl"
-                        className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
-                      />
-                      <ErrorMessage
-                        name="gitHubUrl"
-                        component="div"
-                        className=" text-red-600"
-                      />
-                    </label>
-                  </div>
+            {/* <label htmlFor="gitHubUrl">
+              Path
+              <Field
+                type="text"
+                name="path"
+                className={`border-[0.7px] border-[#424242]  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
+              />
+              <ErrorMessage
+                name="path"
+                component="div"
+                className=" text-red-600"
+              />
+            </label> */}
+            {/* {env.map((e) => (
+              <div className="flex flex-col space-y-2 w-full">
+                <div className="flex space-x-2">
+                  <label htmlFor="gitHubUrl">
+                    Key
+                    <Field
+                      type="text"
+                      name="gitHubUrl"
+                      className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
+                    />
+                    <ErrorMessage
+                      name="gitHubUrl"
+                      component="div"
+                      className=" text-red-600"
+                    />
+                  </label>
+                  <label htmlFor="gitHubUrl">
+                    VaLue
+                    <Field
+                      type="text"
+                      name="gitHubUrl"
+                      className={`${errors.projectName} ? " border-red-500 border-2" : "border-white" border  rounded-lg outline-none text-white w-full py-2 px-4 bg-transparent my-2`}
+                    />
+                    <ErrorMessage
+                      name="gitHubUrl"
+                      component="div"
+                      className=" text-red-600"
+                    />
+                  </label>
                 </div>
-              ))}
-              <div className="w-full flex justify-end">
-                <button
-                  onClick={() => {
-                    setEnv((prev) => [...prev, { key: "", value: "" }]);
-                  }}
-                  className=" bg-purple-600 items-center py-2 px-4 justify-end "
-                >
-                  Add another value
-                </button>
               </div>
+            ))}
+            <div className="w-full flex justify-end">
+              <button
+                onClick={() => {
+                  setEnv((prev) => [...prev, { key: "", value: "" }]);
+                }}
+                className=" bg-purple-600 items-center py-2 px-4 justify-end "
+              >
+                Add another value
+              </button>
+            </div> */}
 
-              <Button type="submit" variant="outline">Submit</Button>
-              {/* <button type="submit" disabled={isSubmitting}>
+            <Button type="submit" variant="outline">
+              Submit
+            </Button>
+            {/* <button type="submit" disabled={isSubmitting}>
                         Submit
                       </button> */}
-            </form>
-          )}
-        </Formik>
-
+          </form>
+        )}
+      </Formik>
+      </div>
+ 
 
       <h1 className="text-white">
         {" "}
@@ -218,7 +220,7 @@ const CreateProject = () => {
             </li>
           ))}
       </ul>
-    </div>
+    </section>
   );
 };
 
