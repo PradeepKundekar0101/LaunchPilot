@@ -173,12 +173,12 @@ export const checkProjectExists = asyncHandler(
 export const getLogs = asyncHandler(async (req: AuthRequest, res: Response) => {
   const deployId = req.params.deployId;
 
-  const deployement = await prismaClient.deployment.findUnique({
+  const deployment = await prismaClient.deployment.findUnique({
       where: {
           id: deployId
       }
   });
-  if (!deployement) {
+  if (!deployment) {
       throw new ApiError(404, "Deployment does not exist");
   }
 
@@ -190,7 +190,7 @@ export const getLogs = asyncHandler(async (req: AuthRequest, res: Response) => {
 
       const logs = result.rows.map(row => {return {log:row.log,timestamp:row.timestamp}});
       
-      res.status(200).json(new ApiResponse(200, "Logs retrieved successfully", {deploymentStatus:deployement.status, logs }, true));
+      res.status(200).json(new ApiResponse(200, "Logs retrieved successfully", {deploymentStatus:deployment.status, logs }, true));
   } catch (error:any) {
       console.error("Error retrieving logs:", error.message);
       throw new ApiError(500, "Internal Server Error");
