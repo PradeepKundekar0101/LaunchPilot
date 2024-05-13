@@ -26,6 +26,7 @@ module.exports = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          button:"#625df4"
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",

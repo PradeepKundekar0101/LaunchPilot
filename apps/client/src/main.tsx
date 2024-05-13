@@ -6,6 +6,8 @@ import { Provider } from "react-redux";
 import router from "./routes/index.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "./components/theme-provider.tsx";
+import ErrorBoundary from "./common/error/ErrorBoundary.tsx";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -13,8 +15,8 @@ const queryClient = new QueryClient({
     },
   },
 });
-
 ReactDOM.createRoot(document.getElementById("root")!).render(
+  <ErrorBoundary>
   <Provider store={store}>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <QueryClientProvider client={queryClient}>
@@ -22,4 +24,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       </QueryClientProvider>
     </ThemeProvider>
   </Provider>
+  </ErrorBoundary>
+
 );

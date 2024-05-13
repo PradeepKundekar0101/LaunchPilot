@@ -10,6 +10,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   try {
     const decodedToken: any = jwtDecode(token);
     if (decodedToken.exp * 1000 < Date.now()) {
+      alert("Session Expired")
       return <Navigate to="/login" />;
     }
   } catch (error) {
