@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DeploymentStatus {
+  NOT_STARTED
+  QUEUED
+  IN_PROGRESS
+  FAILED
+  DEPLOYED
+}
+
+model User {
+  id              String   @id @default(uuid())
+  githubId        String   @unique // GitHub user ID
+  userName        String   @map("user_name") // GitHub username (login field)
+  fullName        String? // GitHub full name (name field)
+  email           String?  @unique // Email may be null from GitHub
+  avatarUrl       String?  @map("avatar_url") // URL for profile picture
+  profileUrl      String?  @map("profile_url") // GitHub profile URL
+  bio             String? // GitHub bio
+  location        String? // GitHub location
+  company         String? // GitHub company (if any)
+  blog            String? // GitHub blog/website URL
+  createdAt       DateTime @default(now()) // Account created at (system-generated)
+  githubCreatedAt DateTime // GitHub account creation date
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  projects Project[]
+
+  @@map("users")
+}
+
+model Project {
+  id          String       @id @default(uuid())
+  projectName String       @map("project_name")
+  gitUrl      String       @map("git_url")
+  // path        String       @default("")
+  // env         String       @default("")
+  user        User         @relation(fields: [userId], references: [id])
+  userId      String       @default("")
+  Deployment  Deployment[]
+}
+
+model Deployment {
+  id        String           @id @default(uuid())
+  project   Project          @relation(fields: [projectId], references: [id])
+  status    DeploymentStatus @default(NOT_STARTED)
+  projectId String           @default("")
+}
